@@ -1,8 +1,13 @@
+"""Contient la définition de types utiles
+pour travailler avec les machines de turing
+"""
+
 from enum import Enum
 
 
 class Move(Enum):
-    """
+    """Indique dans quelle direction la tête de lecture doit se déplacer
+
     Types de déplacement de la tête de lecture :
     - (<|L) LEFT  : déplace la tête de lecture vers la gauche;
     - (>|R) RIGHT : déplace la tête de lecture vers la droite;
@@ -21,6 +26,8 @@ class Move(Enum):
 
 
 class Transition:
+    """Représentation intermédiaire d'une transition sous forme d'objets"""
+
     q_state: str
     r_symbol: tuple[int, ...]
     p_state: str

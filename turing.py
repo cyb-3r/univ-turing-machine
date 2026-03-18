@@ -9,8 +9,8 @@ STOP: str = "F"
 
 
 class Configuration:
-    """
-    La configuration représente l'état de la machine à un temps donné.
+    """Représente l'état de la machine à un temps donné
+
     c = (u, v, q) où :
     - u est la bande avant la tête;
     - v est la bande après la tête inclus;
@@ -86,6 +86,10 @@ class Configuration:
 
 
 class TuringMachine:
+    """Implémentation d'une machine de turing
+    dont l'état est géré par la `Configuration`
+    """
+
     nom: str
     transitions: dict[
         tuple[str, tuple[int, ...]], tuple[str, tuple[int, ...], tuple[Move, ...]]
