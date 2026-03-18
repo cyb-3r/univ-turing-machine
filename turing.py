@@ -19,57 +19,88 @@ class Configuration:
     u et v sont des piles contenant les symboles de la bande.
     """
 
-    u: list[int]
-    v: list[int]
+    nb_ruban: int
+    rubans: list[tuple[list[int], list[int]]]
     q: str
 
-    def __init__(self, w: str):
-        self.u = []
-        self.v = list(reversed([ord(c) for c in w]))
+    def __init__(self, w: str, ruban: int = 1):
+        self.nb_ruban = ruban
+        v = list(reversed([ord(c) for c in w]))
+        self.rubans = [([], v)]
+        for _ in range(1, ruban):
+            self.rubans.append(([], []))
         self.q = START
 
-    def u_str(self):
-        return "".join([chr(c) for c in self.u]) if len(self.u) > 0 else "_"
-
-    def v_str(self):
-        return "".join([chr(c) for c in reversed(self.v)]) if len(self.v) > 0 else "_"
-
     def __str__(self):
-        return f"({self.u_str()}, {self.v_str()}, {self.q})"
+        rubans_txt = ", ".join(
+            f"({u}, {v})" for u, v in zip(self.u_str(), self.v_str())
+        )
+        return f"({rubans_txt}, {self.q})"
 
     def __repr__(self):
         return self.__str__()
 
+    @property
+    def u(self) -> list[list[int]]:
+        return list(map(lambda x: x[0], self.rubans))
+
+    @property
+    def v(self) -> list[list[int]]:
+        return list(map(lambda x: x[1], self.rubans))
+
+    def u_str(self):
+        return tuple(
+            "".join([chr(c) for c in u]) if len(u) > 0 else "_" for u in self.u
+        )
+
+    def v_str(self):
+        return tuple(
+            "".join([chr(c) for c in reversed(v)]) if len(v) > 0 else "_"
+            for v in self.v
+        )
+
     def lire(self):
-        if len(self.v) == 0:
-            self.v.append(BLANK)
-        return self.v.pop()
+        symbols = []
+        for i in range(self.nb_ruban):
+            _, v = self.rubans[i]
+            if len(v) == 0:
+                v.append(BLANK)
+            symbols.append(v.pop())
+        return tuple(symbols)
 
-    def ecrire(self, c: int):
-        self.v.append(c)
+    def ecrire(self, c: tuple[int, ...]):
+        for i in range(self.nb_ruban):
+            _, v = self.rubans[i]
+            v.append(c[i])
 
-    def deplacer(self, move: Move):
-        match move:
-            case Move.LEFT:
-                self.v.append(self.u.pop() if self.u else BLANK)
-            case Move.RIGHT:
-                self.u.append(self.v.pop() if self.v else BLANK)
-            case Move.STAY:
-                pass
+    def deplacer(self, move: tuple[Move, ...]):
+        for i in range(self.nb_ruban):
+            u, v = self.rubans[i]
+            match move[i]:
+                case Move.LEFT:
+                    v.append(u.pop() if u else BLANK)
+                case Move.RIGHT:
+                    u.append(v.pop() if v else BLANK)
+                case Move.STAY:
+                    pass
 
 
 class TuringMachine:
     nom: str
-    transitions: dict[tuple[str, int], tuple[str, int, Move]]
+    transitions: dict[
+        tuple[str, tuple[int, ...]], tuple[str, tuple[int, ...], tuple[Move, ...]]
+    ]
+    ruban: int
 
-    def __init__(self, nom: str = ""):
+    def __init__(self, nom: str = "", ruban: int = 1):
         self.nom = nom
+        self.ruban = ruban
         self.transitions = {}
 
     @classmethod
     def from_file(cls, path: str) -> "TuringMachine":
-        nom, transitions = parse_machine_file(path)
-        machine = cls(nom)
+        nom, ruban, transitions = parse_machine_file(path)
+        machine = cls(nom, ruban)
         for t in transitions:
             machine.add_transition(t)
         return machine
@@ -91,7 +122,8 @@ class TuringMachine:
         sym = config.lire()
         action = self.transitions.get((config.q, sym))
         if action is None:
-            raise ValueError(f"Transition non définie pour ({config.q}, {chr(sym)})")
+            sym_str = ",".join(chr(s) for s in sym)
+            raise ValueError(f"Transition non définie pour ({config.q}, {sym_str})")
         p_state, w_symbol, move = action
         config.ecrire(w_symbol)
         config.deplacer(move)
@@ -100,7 +132,7 @@ class TuringMachine:
 
     def run_configs(self, mot: str) -> list[Configuration]:
         chemin: list[Configuration] = []
-        config = Configuration(mot)
+        config = Configuration(mot, self.ruban)
         while config.q != STOP:
             try:
                 chemin.append(deepcopy(config))
@@ -112,16 +144,18 @@ class TuringMachine:
         return chemin
 
     def run(self, mot: str) -> str:
-        config = Configuration(mot)
+        config = Configuration(mot, self.ruban)
         while config.q != STOP:
             try:
                 config = self.step(config)
             except ValueError:
                 return "_"
-        return "".join([config.u_str(), config.v_str()])
+        return " | ".join(
+            [f"{u}{v}".strip("_") for u, v in zip(config.u_str(), config.v_str())]
+        )
 
     def run_and_log(self, mot: str) -> bool:
-        config = Configuration(mot)
+        config = Configuration(mot, self.ruban)
         while config.q != STOP:
             try:
                 print(config)

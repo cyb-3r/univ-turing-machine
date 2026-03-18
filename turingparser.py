@@ -29,16 +29,24 @@ def parse_transition(code: str) -> tt.Transition:
     temp = code.split(";")
     current = temp[0].split(",")
     next_state = temp[1].split(",")
-    return tt.Transition(
-        current[0], current[1][0], next_state[0], next_state[1][0], str_to_move(next_state[2])
-    )
+
+    q = current[0]
+    a = tuple(current[1:])
+
+    p = next_state[0]
+    k = len(a)
+    b = tuple(next_state[1 : 1 + k])
+    d = tuple(str_to_move(s) for s in next_state[1 + k :])
+
+    return tt.Transition(q, a, p, b, d)
 
 
-def parse_machine_file(path: str) -> tuple[str, list[tt.Transition]]:
+def parse_machine_file(path: str) -> tuple[str, int, list[tt.Transition]]:
     with open(path) as data:
         lines = [line for line in map(str.strip, data) if line]
 
     name = read_header_line(lines[0])
-    transitions = [parse_transition(code) for code in lines[1:]]
+    rubans = int(read_header_line(lines[1]))
+    transitions = [parse_transition(code) for code in lines[2:]]
 
-    return name, transitions
+    return name, rubans, transitions

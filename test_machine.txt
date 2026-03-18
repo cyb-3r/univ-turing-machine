@@ -1,9 +1,10 @@
 name: test
+rubans: 2
 
-I,a;q1,a,>
+I,a,_;q1,a,a,>,<
 
-q1,b;q2,b,>
+q1,b,_;q2,b,b,>,<
 
-q2,c;q3,c,>
+q2,c,_;q3,c,c,>,<
 
-q3,_;F,_,-
+q3,_,_;F,_,_,-,-
