@@ -134,7 +134,8 @@ class TuringMachine:
         config.q = p_state
         return config
 
-    def run_configs(self, mot: str) -> list[Configuration]:
+    def _run_configs(self, mot: str) -> list[Configuration]:
+        print(f"Exécution de la machine: {self.nom}")
         chemin: list[Configuration] = []
         config = Configuration(mot, self.ruban)
         while config.q != STOP:
@@ -148,6 +149,7 @@ class TuringMachine:
         return chemin
 
     def run(self, mot: str) -> str:
+        print(f"Exécution de la machine: {self.nom}")
         config = Configuration(mot, self.ruban)
         while config.q != STOP:
             try:
@@ -159,6 +161,7 @@ class TuringMachine:
         )
 
     def run_and_log(self, mot: str) -> bool:
+        print(f"Exécution de la machine: {self.nom}")
         config = Configuration(mot, self.ruban)
         while config.q != STOP:
             try:
@@ -177,5 +180,9 @@ def display_chemin(configs: list[Configuration]):
 
 # Testing
 if __name__ == "__main__":
-    m = TuringMachine.from_file("./less.txt")
-    pprint(m.run_configs("0001#0101"))
+    
+    # LESS(x#y) s'arrête seulement si x < y
+    # LESS suppose que x et y sont de la même longueur
+    less = TuringMachine.from_file("./less.txt")
+    pprint(less._run_configs("0001#0101"))
+    less.run_and_log("0001#0101")
