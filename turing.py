@@ -1,47 +1,11 @@
-from dataclasses import dataclass
-from enum import Enum
 from copy import deepcopy
+
+import turingparser as tp
+import utils
 
 BLANK: int = ord("_")
 START: str = "I"
 STOP: str = "F"
-# ASCII
-GAMMA: list[int] = [c for c in range(256)]
-SIGMA: list[int] = [c for c in GAMMA if c != BLANK]
-
-
-class Move(Enum):
-    """
-    Types de déplacement de la tête de lecture :
-    - (L) LEFT  : déplace la tête de lecture vers la gauche;
-    - (R) RIGHT : déplace la tête de lecture vers la droite;
-    - (S) STAY  : ne déplace pas la tête de lecture.
-    """
-
-    LEFT = -1
-    STAY = 0
-    RIGHT = 1
-
-    def __repr__(self):
-        return "L" if self == Move.LEFT else "R" if self == Move.RIGHT else "S"
-
-    def __str__(self):
-        return self.__repr__()
-
-
-@dataclass
-class Transition(object):
-    q_state: int
-    r_symbol: str
-    w_symbol: str
-    move: Move
-    p_state: int
-
-    def __str__(self):
-        return (
-            f"δ({self.q_state}, {self.r_symbol}) = "
-            f"({self.p_state}, {self.w_symbol}, {self.move})"
-        )
 
 
 class Configuration(object):
@@ -57,7 +21,7 @@ class Configuration(object):
 
     u: list[int]
     v: list[int]
-    q: int
+    q: str
 
     def __init__(self, w: str):
         self.u = []
@@ -77,27 +41,27 @@ class Configuration(object):
         return self.__str__()
 
     def lire(self):
-        if not self.v:
+        if len(self.v) == 0:
             self.v.append(BLANK)
         return self.v.pop()
 
     def ecrire(self, c: int):
         self.v.append(c)
 
-    def deplacer(self, move: Move):
+    def deplacer(self, move: utils.Move):
         match move:
-            case Move.LEFT:
+            case utils.Move.LEFT:
                 self.v.append(self.u.pop())
-            case Move.RIGHT:
+            case utils.Move.RIGHT:
                 self.u.append(self.v.pop())
-            case Move.STAY:
+            case utils.Move.STAY:
                 pass
 
 
 class TuringMachine(object):
     nom: str
-    start: str
-    transitions: dict[tuple[int, str], tuple[int, str, Move]]
+    # Transitions[q, a] -> [p, a', D]
+    transitions: dict[tuple[str, int], tuple[str, int, utils.Move]]
     state: int
 
     def __init__(self, nom: str):
@@ -107,19 +71,26 @@ class TuringMachine(object):
 
     def get_states(self) -> set[str]:
         return (
-            {q for _, q in self.transitions.keys()}
-            | {p for _, p, _ in self.transitions.values()}
+            {q for q, _ in self.transitions.keys()}
+            | {p for p, _, _ in self.transitions.values()}
             | {START, STOP}
         )
 
-    def avec_transitions(self, *transitions: Transition):
+    def avec_transitions(self, *transitions: utils.Transition):
         self.transitions = {
             (t.q_state, t.r_symbol): (t.p_state, t.w_symbol, t.move)
             for t in transitions
         }
         return self
 
-    def add_transition(self, transition: Transition):
+    def with_transitions(self, *code: str):
+        self.transitions = {
+            (t.q_state, t.r_symbol): (t.p_state, t.w_symbol, t.move)
+            for t in map(lambda s: tp.process_transition(s), code)
+        }
+        return self
+
+    def add_transition(self, transition: utils.Transition):
         self.transitions[(transition.q_state, transition.r_symbol)] = (
             transition.p_state,
             transition.w_symbol,
@@ -127,18 +98,11 @@ class TuringMachine(object):
         )
         return self
 
-    def show_transition(self, q_state: int, r_symbol: str) -> str:
-        p_state, w_symbol, move = self.transitions[(q_state, r_symbol)]
-        return (
-            f"δ({self.states[q_state]}, {r_symbol}) -> "
-            f"({self.states[p_state]}, {w_symbol}, {move})"
-        )
-
     def step(self, config: Configuration) -> Configuration:
         sym = config.lire()
         action = self.transitions.get((config.q, sym))
         if action is None:
-            raise ValueError(f"Transition non définie pour ({config.q}, {sym})")
+            raise ValueError(f"utils.Transition non définie pour ({config.q}, {sym})")
         p_state, w_symbol, move = action
         config.ecrire(w_symbol)
         config.deplacer(move)
@@ -185,11 +149,8 @@ class TuringMachine(object):
 
 # Testing
 if __name__ == "__main__":
-    m = TuringMachine("Reader").avec_transitions(
-        Transition(START, ord("a"), ord("a"), Move.RIGHT, "q1"),
-        Transition("q1", ord("b"), ord("b"), Move.RIGHT, "q2"),
-        Transition("q2", ord("c"), ord("c"), Move.RIGHT, "q3"),
-        Transition("q3", BLANK, BLANK, Move.STAY, STOP),
+    m = TuringMachine("Reader").with_transitions(
+        "I,a;q1,a,>", "q1,b;q2,b,>", "q2,c;q3,c,>", "q3,_;F,_,-"
     )
     print(m.transitions.keys(), m.transitions.values())
     print(m.get_states())

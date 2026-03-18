@@ -1,15 +1,9 @@
 name: test
-start: I
-accept: F
 
-I,a
-q1,a,>
+I,a;q1,a,>
 
-q1,b
-q2,b,>
+q1,b;q2,b,>
 
-q2,c
-q3,c,>
+q2,c;q3,c,>
 
-q3,_
-F,_,-
+q3,_;F,_,-
