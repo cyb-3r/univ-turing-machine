@@ -1,23 +1,23 @@
-import utils
+import turingtypes as tt
 
 
 def read_header_line(line: str) -> str:
     return line.split(":")[-1].strip()
 
 
-def _str_to_move(symbol: str) -> utils.Move:
+def str_to_move(symbol: str) -> tt.Move:
     match symbol:
-        case "<":
-            return utils.Move.LEFT
-        case "-":
-            return utils.Move.STAY
-        case ">":
-            return utils.Move.RIGHT
+        case "<" | "L":
+            return tt.Move.LEFT
+        case "-" | "S":
+            return tt.Move.STAY
+        case ">" | "R":
+            return tt.Move.RIGHT
         case _:
-            return utils.Move.STAY
+            return tt.Move.STAY
 
 
-def parse_transition(code: str) -> utils.Transition:
+def parse_transition(code: str) -> tt.Transition:
     """
     Une transition s'écrit sous la forme q,a;p,a,D où:
         - q est l'état de départ;
@@ -27,25 +27,18 @@ def parse_transition(code: str) -> utils.Transition:
     """
 
     temp = code.split(";")
-    current, next = temp[0].split(","), temp[1].split(",")
-    print(f"d({current[0]}, {current[1]}) = ({next[0]}, {next[1]}, {next[2]})")
-    return utils.Transition(
-        current[0], current[1][0], next[0], next[1][0], _str_to_move(next[2])
+    current = temp[0].split(",")
+    next_state = temp[1].split(",")
+    return tt.Transition(
+        current[0], current[1][0], next_state[0], next_state[1][0], str_to_move(next_state[2])
     )
 
 
-def parsefile(path: str):
+def parse_machine_file(path: str) -> tuple[str, list[tt.Transition]]:
     with open(path) as data:
-        txt = list(filter(lambda x: len(x) > 0, [s.strip() for s in data.readlines()]))
-        print(txt)
-        name = read_header_line(txt.pop(0))
-        start = read_header_line(txt.pop(0))
-        halt = read_header_line(txt.pop(0))
-        print(name, start, halt)
+        lines = [line for line in map(str.strip, data) if line]
 
-        for code in txt:
-            parse_transition(code)
+    name = read_header_line(lines[0])
+    transitions = [parse_transition(code) for code in lines[1:]]
 
-
-if __name__ == "__main__":
-    parsefile("./test_machine.txt")
+    return name, transitions

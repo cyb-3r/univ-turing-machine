@@ -1,14 +1,14 @@
 from copy import deepcopy
 
-import turingparser as tp
-import utils
+from turingparser import parse_machine_file, parse_transition
+from turingtypes import Move, Transition
 
 BLANK: int = ord("_")
 START: str = "I"
 STOP: str = "F"
 
 
-class Configuration(object):
+class Configuration:
     """
     La configuration représente l'état de la machine à un temps donné.
     c = (u, v, q) où :
@@ -48,50 +48,38 @@ class Configuration(object):
     def ecrire(self, c: int):
         self.v.append(c)
 
-    def deplacer(self, move: utils.Move):
+    def deplacer(self, move: Move):
         match move:
-            case utils.Move.LEFT:
-                self.v.append(self.u.pop())
-            case utils.Move.RIGHT:
-                self.u.append(self.v.pop())
-            case utils.Move.STAY:
+            case Move.LEFT:
+                self.v.append(self.u.pop() if self.u else BLANK)
+            case Move.RIGHT:
+                self.u.append(self.v.pop() if self.v else BLANK)
+            case Move.STAY:
                 pass
 
 
-class TuringMachine(object):
+class TuringMachine:
     nom: str
-    # Transitions[q, a] -> [p, a', D]
-    transitions: dict[tuple[str, int], tuple[str, int, utils.Move]]
-    state: int
+    transitions: dict[tuple[str, int], tuple[str, int, Move]]
 
-    def __init__(self, path: str):
-        with open(path) as data:
-            txt = list(
-                filter(lambda x: len(x) > 0, [s.strip() for s in data.readlines()])
-            )
-            print(txt)
-            self.nom = tp.read_header_line(txt.pop(0))
+    def __init__(self, nom: str = ""):
+        self.nom = nom
+        self.transitions = {}
 
-            self.transitions = {}
-
-            for code in txt:
-                self.add_transition(tp.parse_transition(code))
-
-    def avec_transitions(self, *transitions: utils.Transition):
-        self.transitions = {
-            (t.q_state, t.r_symbol): (t.p_state, t.w_symbol, t.move)
-            for t in transitions
-        }
-        return self
+    @classmethod
+    def from_file(cls, path: str) -> "TuringMachine":
+        nom, transitions = parse_machine_file(path)
+        machine = cls(nom)
+        for t in transitions:
+            machine.add_transition(t)
+        return machine
 
     def with_transitions(self, *code: str):
-        self.transitions = {
-            (t.q_state, t.r_symbol): (t.p_state, t.w_symbol, t.move)
-            for t in map(lambda s: tp.parse_transition(s), code)
-        }
+        for c in code:
+            self.add_transition(parse_transition(c))
         return self
 
-    def add_transition(self, transition: utils.Transition):
+    def add_transition(self, transition: Transition):
         self.transitions[(transition.q_state, transition.r_symbol)] = (
             transition.p_state,
             transition.w_symbol,
@@ -103,7 +91,7 @@ class TuringMachine(object):
         sym = config.lire()
         action = self.transitions.get((config.q, sym))
         if action is None:
-            raise ValueError(f"utils.Transition non définie pour ({config.q}, {sym})")
+            raise ValueError(f"Transition non définie pour ({config.q}, {chr(sym)})")
         p_state, w_symbol, move = action
         config.ecrire(w_symbol)
         config.deplacer(move)
@@ -151,9 +139,6 @@ def display_chemin(configs: list[Configuration]):
 
 # Testing
 if __name__ == "__main__":
-    # m = TuringMachine("Test").with_transitions(
-    #     "I,a;q1,c,>", "q1,b;q2,b,>", "q2,c;q3,a,>", "q3,_;F,_,-"
-    # )
-    m = TuringMachine("./test_machine.txt")
+    m = TuringMachine.from_file("./test_machine.txt")
     display_chemin(m.run_configs("abc"))
     print(m.run("abc"))
