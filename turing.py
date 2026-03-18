@@ -64,17 +64,18 @@ class TuringMachine(object):
     transitions: dict[tuple[str, int], tuple[str, int, utils.Move]]
     state: int
 
-    def __init__(self, nom: str):
-        self.nom = nom
-        self.start = START
-        self.transitions = {}
+    def __init__(self, path: str):
+        with open(path) as data:
+            txt = list(
+                filter(lambda x: len(x) > 0, [s.strip() for s in data.readlines()])
+            )
+            print(txt)
+            self.nom = tp.read_header_line(txt.pop(0))
 
-    def get_states(self) -> set[str]:
-        return (
-            {q for q, _ in self.transitions.keys()}
-            | {p for p, _, _ in self.transitions.values()}
-            | {START, STOP}
-        )
+            self.transitions = {}
+
+            for code in txt:
+                self.add_transition(tp.parse_transition(code))
 
     def avec_transitions(self, *transitions: utils.Transition):
         self.transitions = {
@@ -86,7 +87,7 @@ class TuringMachine(object):
     def with_transitions(self, *code: str):
         self.transitions = {
             (t.q_state, t.r_symbol): (t.p_state, t.w_symbol, t.move)
-            for t in map(lambda s: tp.process_transition(s), code)
+            for t in map(lambda s: tp.parse_transition(s), code)
         }
         return self
 
@@ -122,14 +123,14 @@ class TuringMachine(object):
         chemin.append(deepcopy(config))
         return chemin
 
-    def run(self, mot: str) -> bool:
+    def run(self, mot: str) -> str:
         config = Configuration(mot)
         while config.q != STOP:
             try:
                 config = self.step(config)
             except ValueError:
-                return False
-        return True
+                return "_"
+        return "".join([config.u_str(), config.v_str()])
 
     def run_and_log(self, mot: str) -> bool:
         config = Configuration(mot)
@@ -143,17 +144,16 @@ class TuringMachine(object):
         print(config)
         return True
 
-    def run_display(self, mot: str):
-        print(" -> ".join(map(str, self.run_configs(mot))))
+
+def display_chemin(configs: list[Configuration]):
+    print(" -> ".join(map(str, configs)))
 
 
 # Testing
 if __name__ == "__main__":
-    m = TuringMachine("Reader").with_transitions(
-        "I,a;q1,a,>", "q1,b;q2,b,>", "q2,c;q3,c,>", "q3,_;F,_,-"
-    )
-    print(m.transitions.keys(), m.transitions.values())
-    print(m.get_states())
-    m.run_display("abc")
-    m.run_and_log("abc")
-    print(f'"abc" est {"accepté" if m.run("abc") else "refusé"}')
+    # m = TuringMachine("Test").with_transitions(
+    #     "I,a;q1,c,>", "q1,b;q2,b,>", "q2,c;q3,a,>", "q3,_;F,_,-"
+    # )
+    m = TuringMachine("./test_machine.txt")
+    display_chemin(m.run_configs("abc"))
+    print(m.run("abc"))

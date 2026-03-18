@@ -1,7 +1,7 @@
 import utils
 
 
-def _read_header_line(line: str) -> str:
+def read_header_line(line: str) -> str:
     return line.split(":")[-1].strip()
 
 
@@ -17,7 +17,7 @@ def _str_to_move(symbol: str) -> utils.Move:
             return utils.Move.STAY
 
 
-def process_transition(code: str):
+def parse_transition(code: str) -> utils.Transition:
     """
     Une transition s'écrit sous la forme q,a;p,a,D où:
         - q est l'état de départ;
@@ -38,13 +38,13 @@ def parsefile(path: str):
     with open(path) as data:
         txt = list(filter(lambda x: len(x) > 0, [s.strip() for s in data.readlines()]))
         print(txt)
-        name = _read_header_line(txt.pop(0))
-        start = _read_header_line(txt.pop(0))
-        halt = _read_header_line(txt.pop(0))
+        name = read_header_line(txt.pop(0))
+        start = read_header_line(txt.pop(0))
+        halt = read_header_line(txt.pop(0))
         print(name, start, halt)
 
         for code in txt:
-            process_transition(code)
+            parse_transition(code)
 
 
 if __name__ == "__main__":
