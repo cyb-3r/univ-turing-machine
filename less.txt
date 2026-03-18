@@ -1,0 +1,18 @@
+name: less
+rubans: 2
+
+I,1,_;I,_,1,>,>
+I,0,_;I,_,0,>,>
+
+I,#,_;qLeft,#,_,-,<
+
+qLeft,#,1;qLeft,#,1,-,<
+qLeft,#,0;qLeft,#,0,-,<
+
+qLeft,#,_;qTest,#,_,>,>
+
+qTest,1,1;qTest,1,1,>,>
+qTest,0,0;qTest,0,0,>,>
+
+qTest,1,0;F,1,0,-,-
+qTest,_,_;qLoop,_,_,-,-
