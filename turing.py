@@ -1,5 +1,5 @@
+from pprint import pprint
 from copy import deepcopy
-
 from turingparser import parse_machine_file, parse_transition
 from turingtypes import Move, Transition
 
@@ -177,6 +177,5 @@ def display_chemin(configs: list[Configuration]):
 
 # Testing
 if __name__ == "__main__":
-    m = TuringMachine.from_file("./test_machine.txt")
-    display_chemin(m.run_configs("abc"))
-    print(m.run("abc"))
+    m = TuringMachine.from_file("./less.txt")
+    pprint(m.run_configs("0001#0101"))
