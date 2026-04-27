@@ -5,7 +5,8 @@ fichiers
 
 Un fichier est composé d'un en-tête suivi d'une liste de transitions.
 Les lignes vides sont ignorées.
-Les commentaires ne sont pas supportés.
+Les commentaires commencent par '#' et prennent la ligne entière.
+Ne surtout pas mélanger des commentaires avec du code !
 
 **Format** :
 
@@ -21,11 +22,11 @@ Les commentaires ne sont pas supportés.
 <etat_depart>    ::= <string>
 <etat_arrivee>   ::= <string>
 
-<symboles_lus>   ::= <symbole> | <symbole> "," <symboles_lus>
-<symboles_ecrits>::= <symbole> | <symbole> "," <symboles_ecrits>
+<symboles_lus>   ::= <symbole> | <symbole> <symboles_lus>
+<symboles_ecrits>::= <symbole> | <symbole> <symboles_ecrits>
 <symbole>        ::= <char> | "_"
 
-<deplacements>   ::= <direction> | <direction> "," <deplacements>
+<deplacements>   ::= <direction> | <direction> <deplacements>
 <direction>      ::= "<" | "L" | "-" | "S" | ">" | "R"
 ```
 
@@ -57,25 +58,27 @@ def parse_transition(code: str) -> tt.Transition:
     """
     Créer une instance de `Transition` à partir d'une chaîne donnée
 
-    Une transition s'écrit sous la forme q,(a,...);p,(a,...),(D,...) où:
+    Une transition s'écrit sous la forme q,a...;p,b...,D... où:
         - q est l'état de départ;
-        - (a,...) est un n-uplet de lettre dans l'alphabet;
+        - a... est une chaîne de lettres lues dans l'alphabet;
         - p est l'état d'arrivée;
-        - (b,...) est un n-uplet de lettre dans l'alphabet;
-        - (D,...) est un n-uplet d'éléments parmis {<, -, >} <=> {L, S, R}
+        - b... est une chaîne de lettres écrites dans l'alphabet;
+        - D... est une chaîne de déplacements parmis {<, -, >} <=> {L, S, R}
     """
 
     temp = code.split(";")
+    
     current = temp[0].split(",")
+    q = current[0].strip()
+    a = tuple("".join(current[1:]).replace(" ", ""))
+
     next_state = temp[1].split(",")
-
-    q = current[0]
-    a = tuple(current[1:])
-
-    p = next_state[0]
+    p = next_state[0].strip()
+    
+    rest = "".join(next_state[1:]).replace(" ", "")
     k = len(a)
-    b = tuple(next_state[1 : 1 + k])
-    d = tuple(str_to_move(s) for s in next_state[1 + k :])
+    b = tuple(rest[:k])
+    d = tuple(str_to_move(s) for s in rest[k:])
 
     return tt.Transition(q, a, p, b, d)
 
@@ -83,7 +86,7 @@ def parse_transition(code: str) -> tt.Transition:
 def parse_machine_file(path: str) -> tuple[str, int, list[tt.Transition]]:
     """Renvoie les éléments nécessaires à la construction d'une machine"""
     with open(path) as data:
-        lines = [line for line in map(str.strip, data) if line]
+        lines = [line for line in map(str.strip, data) if line and not line.startswith("#")]
 
     name = read_header_line(lines[0])
     rubans = int(read_header_line(lines[1]))

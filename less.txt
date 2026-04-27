@@ -1,21 +1,27 @@
 name: less
 rubans: 2
 
-I,1,_;I,_,1,>,>
-I,0,_;I,_,0,>,>
+# entrée : x#y
 
-I,#,_;qLeft,#,_,-,<
+# on copie la première partie de l'entrée vers r2
+I,1_;I,_1,>>
+I,0_;I,_0,>>
 
-qLeft,#,1;qLeft,#,1,-,<
-qLeft,#,0;qLeft,#,0,-,<
+# on repositionne la tête de r2 à gauche
+I,#_;qLeft,#_,-<
 
-qLeft,#,_;qTest,#,_,>,>
+qLeft,#1;qLeft,#1,-<
+qLeft,#0;qLeft,#0,-<
 
-qTest,1,1;qTest,1,1,>,>
-qTest,0,0;qTest,0,0,>,>
+# on commence à comparer x et y
+qLeft,#_;qTest,#_,>>
 
-qTest,1,0;F,1,0,-,-
+qTest,11;qTest,11,>>
+qTest,00;qTest,00,>>
 
-qTest,_,_;qLoop,_,_,-,-
+# si x < y on s'arrête
+qTest,10;F,10,--
 
-qLoop,_,_;qLoop,_,_,-,-
+qTest,__;qLoop,__,--
+
+qLoop,__,;qLoop,__,--

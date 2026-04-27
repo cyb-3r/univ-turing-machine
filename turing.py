@@ -3,6 +3,8 @@ from copy import deepcopy
 from turingparser import parse_machine_file, parse_transition
 from turingtypes import Move, Transition
 
+import sys
+
 BLANK: int = ord("_")
 START: str = "I"
 STOP: str = "F"
@@ -178,11 +180,11 @@ def display_chemin(configs: list[Configuration]):
     print(" -> ".join(map(str, configs)))
 
 
-# Testing
 if __name__ == "__main__":
     
-    # LESS(x#y) s'arrête seulement si x < y
-    # LESS suppose que x et y sont de la même longueur
-    less = TuringMachine.from_file("./less.txt")
-    pprint(less._run_configs("0001#0101"))
-    less.run_and_log("0001#0101")
+    path = sys.argv[1] if len(sys.argv) > 1 else "./less.txt"
+    word = sys.argv[2] if len(sys.argv) > 2 else "0001#0101"
+
+    tm = TuringMachine.from_file(path)
+    pprint(tm._run_configs(word))
+    tm.run_and_log(word)
