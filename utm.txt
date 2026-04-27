@@ -1,0 +1,340 @@
+name: univ
+rubans: 3
+
+# code de la machine de turing universelle
+# entrée <M>#x, M une machine à 1 ruban, x un mot tq x in ({0,1}*)
+
+# on se déplace une case à gauche
+I,0__;q1,0__,<--
+I,1__;q1,1__,<--
+
+# on place une sentinelle # avant <M>
+# puis on revient au début de <M>
+q1,___;q2,#__,>--
+
+# on va à droite vers la fin de <M>
+q2,0__;q2,0__,>--
+q2,1__;q2,1__,>--
+q2,|__;q2,|__,>--
+q2,___;q2,___,>--
+q2,<__;q2,<__,>--
+q2,-__;q2,-__,>--
+q2,>__;q2,>__,>--
+
+q2,#__;q3,#__,>--
+
+# on copie x dans r3
+q3,0__;q3,__0,>->
+q3,1__;q3,__1,>->
+q3,___;q4,___,<-<
+
+# on revient dans <M> et en repositionne la tête de r3 à gauche
+q4,___;q4,___,<-<
+q4,__0;q4,__0,<-<
+q4,__1;q4,__1,<-<
+q4,#__;q5,#__,<--
+q4,#_0;q5,#_0,<--
+q4,#_1;q5,#_1,<--
+
+# on se positionne au début de <M>
+q5,0__;q5,0__,<--
+q5,1__;q5,1__,<--
+q5,|__;q5,|__,<--
+q5,___;q5,___,<--
+q5,<__;q5,<__,<--
+q5,-__;q5,-__,<--
+q5,>__;q5,>__,<--
+q5,#__;q6,#__,---
+
+# on prépare r2
+q6,#__;qBEGIN,#0_,---
+
+# toutes les têtes sont prêtes
+qBEGIN,#0_;qMATCH(1/2),#0_,>->
+
+# on commence la recherche linéaire
+
+# on vérifie r1 == r2
+qMATCH(1/2),00_;qMATCH(1/2),00_,>>-
+qMATCH(1/2),000;qMATCH(1/2),000,>>-
+qMATCH(1/2),001;qMATCH(1/2),001,>>-
+qMATCH(1/2),11_;qMATCH(1/2),11_,>>-
+qMATCH(1/2),110;qMATCH(1/2),110,>>-
+qMATCH(1/2),111;qMATCH(1/2),111,>>-
+
+# r1 != r2
+qMATCH(1/2),01_;qNEXT_1,01_,---
+qMATCH(1/2),010;qNEXT_1,010,---
+qMATCH(1/2),011;qNEXT_1,011,---
+qMATCH(1/2),0__;qNEXT_1,0__,---
+qMATCH(1/2),0_0;qNEXT_1,0_0,---
+qMATCH(1/2),0_1;qNEXT_1,0_1,---
+qMATCH(1/2),10_;qNEXT_1,10_,---
+qMATCH(1/2),100;qNEXT_1,100,---
+qMATCH(1/2),101;qNEXT_1,101,---
+qMATCH(1/2),1__;qNEXT_1,1__,---
+qMATCH(1/2),1_0;qNEXT_1,1_0,---
+qMATCH(1/2),1_1;qNEXT_1,1_1,---
+qMATCH(1/2),|0_;qNEXT_1,|0_,---
+qMATCH(1/2),|00;qNEXT_1,|00,---
+qMATCH(1/2),|01;qNEXT_1,|01,---
+qMATCH(1/2),|1_;qNEXT_1,|1_,---
+qMATCH(1/2),|10;qNEXT_1,|10,---
+qMATCH(1/2),|11;qNEXT_1,|11,---
+
+# r1 == r2 vérifié
+qMATCH(1/2),|__;qMATCH(1/3),|__,>--
+qMATCH(1/2),|_0;qMATCH(1/3),|_0,>--
+qMATCH(1/2),|_1;qMATCH(1/3),|_1,>--
+
+# puis on vérifie r1 == r3
+qMATCH(1/3),___;qPREWRITE(3),___,>--
+qMATCH(1/3),0_0;qPREWRITE(3),0_0,>--
+qMATCH(1/3),1_1;qPREWRITE(3),1_1,>--
+
+# r1 != r3
+qMATCH(1/3),__0;qNEXT_2,__0,---
+qMATCH(1/3),__1;qNEXT_2,__1,---
+qMATCH(1/3),0_1;qNEXT_2,0_1,---
+qMATCH(1/3),0__;qNEXT_2,0__,---
+qMATCH(1/3),1_0;qNEXT_2,1_0,---
+qMATCH(1/3),1__;qNEXT_2,1__,---
+
+# r1 == r3 vérifié
+qPREWRITE(3),|__;qWRITE(3),|__,>--
+qPREWRITE(3),|_0;qWRITE(3),|_0,>--
+qPREWRITE(3),|_1;qWRITE(3),|_1,>--
+
+# r3 <- r1
+qWRITE(3),___;qPREMOVE(3),___,>--
+qWRITE(3),__0;qPREMOVE(3),___,>--
+qWRITE(3),__1;qPREMOVE(3),___,>--
+qWRITE(3),0__;qPREMOVE(3),0_0,>--
+qWRITE(3),0_0;qPREMOVE(3),0_0,>--
+qWRITE(3),0_1;qPREMOVE(3),0_0,>--
+qWRITE(3),1__;qPREMOVE(3),1_1,>--
+qWRITE(3),1_0;qPREMOVE(3),1_1,>--
+qWRITE(3),1_1;qPREMOVE(3),1_1,>--
+
+qPREMOVE(3),|__;qMOVE(3),|__,>--
+qPREMOVE(3),|_0;qMOVE(3),|_0,>--
+qPREMOVE(3),|_1;qMOVE(3),|_1,>--
+
+# on déplace la tête de r3 selon le symbole sur r1
+qMOVE(3),<__;qPRECLEAR(2),<__,>-<
+qMOVE(3),<_0;qPRECLEAR(2),<_0,>-<
+qMOVE(3),<_1;qPRECLEAR(2),<_1,>-<
+qMOVE(3),-__;qPRECLEAR(2),-__,>--
+qMOVE(3),-_0;qPRECLEAR(2),-_0,>--
+qMOVE(3),-_1;qPRECLEAR(2),-_1,>--
+qMOVE(3),>__;qPRECLEAR(2),>__,>->
+qMOVE(3),>_0;qPRECLEAR(2),>_0,>->
+qMOVE(3),>_1;qPRECLEAR(2),>_1,>->
+
+qPRECLEAR(2),|__;qCLEAR(2),|__,-<-
+qPRECLEAR(2),|_0;qCLEAR(2),|_0,-<-
+qPRECLEAR(2),|_1;qCLEAR(2),|_1,-<-
+
+# le contenu de r2 est effacé
+qCLEAR(2),|0_;qCLEAR(2),|__,-<-
+qCLEAR(2),|00;qCLEAR(2),|_0,-<-
+qCLEAR(2),|01;qCLEAR(2),|_1,-<-
+qCLEAR(2),|1_;qCLEAR(2),|__,-<-
+qCLEAR(2),|10;qCLEAR(2),|_0,-<-
+qCLEAR(2),|11;qCLEAR(2),|_1,-<-
+
+qCLEAR(2),|__;qWRITE(1/2),|__,>>-
+qCLEAR(2),|_0;qWRITE(1/2),|_0,>>-
+qCLEAR(2),|_1;qWRITE(1/2),|_1,>>-
+
+# l'état d'arrivé dans r1 est recopié dans r2
+qWRITE(1/2),0__;qWRITE(1/2),00_,>>-
+qWRITE(1/2),0_0;qWRITE(1/2),000,>>-
+qWRITE(1/2),0_1;qWRITE(1/2),001,>>-
+qWRITE(1/2),1__;qWRITE(1/2),11_,>>-
+qWRITE(1/2),1_0;qWRITE(1/2),110,>>-
+qWRITE(1/2),1_1;qWRITE(1/2),111,>>-
+
+qWRITE(1/2),|__;qLEFT(1),|__,<--
+qWRITE(1/2),|_0;qLEFT(1),|_0,<--
+qWRITE(1/2),|_1;qLEFT(1),|_1,<--
+qWRITE(1/2),#__;qLEFT(1),#__,<--
+qWRITE(1/2),#_0;qLEFT(1),#_0,<--
+qWRITE(1/2),#_1;qLEFT(1),#_1,<--
+
+# on revient tout à gauche de r2
+## on pense à vérifier si on a terminé la simulation
+### on a bien fini la simulation
+qISDONE,#1_;qISDONE_2,#1_,-<-
+qISDONE,#10;qISDONE_2,#10,-<-
+qISDONE,#11;qISDONE_2,#11,-<-
+
+qISDONE_2,#__;F,#__,---
+qISDONE_2,#_0;F,#_0,---
+qISDONE_2,#_1;F,#_1,---
+
+### on n'a pas fini
+qISDONE,#0_;qLEFT(2),#0_,-<-
+qISDONE,#00;qLEFT(2),#00,-<-
+qISDONE,#01;qLEFT(2),#01,-<-
+
+qISDONE_2,#0_;qLEFT(2),#0_,-<-
+qISDONE_2,#00;qLEFT(2),#00,-<-
+qISDONE_2,#01;qLEFT(2),#01,-<-
+qISDONE_2,#1_;qLEFT(2),#1_,-<-
+qISDONE_2,#10;qLEFT(2),#10,-<-
+qISDONE_2,#11;qLEFT(2),#11,-<-
+
+# on retourne tout à gauche de r2
+qLEFT(2),|0_;qLEFT(2),|0_,-<-
+qLEFT(2),|00;qLEFT(2),|00,-<-
+qLEFT(2),|01;qLEFT(2),|01,-<-
+qLEFT(2),|1_;qLEFT(2),|1_,-<-
+qLEFT(2),|10;qLEFT(2),|10,-<-
+qLEFT(2),|11;qLEFT(2),|11,-<-
+qLEFT(2),#0_;qLEFT(2),#0_,-<-
+qLEFT(2),#00;qLEFT(2),#00,-<-
+qLEFT(2),#01;qLEFT(2),#01,-<-
+qLEFT(2),#1_;qLEFT(2),#1_,-<-
+qLEFT(2),#10;qLEFT(2),#10,-<-
+qLEFT(2),#11;qLEFT(2),#11,-<-
+
+qLEFT(2),|__;qMATCH(1/2),|__,>>-
+qLEFT(2),|_0;qMATCH(1/2),|_0,>>-
+qLEFT(2),|_1;qMATCH(1/2),|_1,>>-
+qLEFT(2),#__;qMATCH(1/2),#__,>>-
+qLEFT(2),#_0;qMATCH(1/2),#_0,>>-
+qLEFT(2),#_1;qMATCH(1/2),#_1,>>-
+
+# on revient tout à gauche de r1
+qLEFT(1),0__;qLEFT(1),0__,<--
+qLEFT(1),0_0;qLEFT(1),0_0,<--
+qLEFT(1),0_1;qLEFT(1),0_1,<--
+qLEFT(1),1__;qLEFT(1),1__,<--
+qLEFT(1),1_0;qLEFT(1),1_0,<--
+qLEFT(1),1_1;qLEFT(1),1_1,<--
+qLEFT(1),|__;qLEFT(1),|__,<--
+qLEFT(1),|_0;qLEFT(1),|_0,<--
+qLEFT(1),|_1;qLEFT(1),|_1,<--
+qLEFT(1),___;qLEFT(1),___,<--
+qLEFT(1),__0;qLEFT(1),__0,<--
+qLEFT(1),__1;qLEFT(1),__1,<--
+qLEFT(1),<__;qLEFT(1),<__,<--
+qLEFT(1),<_0;qLEFT(1),<_0,<--
+qLEFT(1),<_1;qLEFT(1),<_1,<--
+qLEFT(1),-__;qLEFT(1),-__,<--
+qLEFT(1),-_0;qLEFT(1),-_0,<--
+qLEFT(1),-_1;qLEFT(1),-_1,<--
+qLEFT(1),>__;qLEFT(1),>__,<--
+qLEFT(1),>_0;qLEFT(1),>_0,<--
+qLEFT(1),>_1;qLEFT(1),>_1,<--
+
+# on relance la recherche
+qLEFT(1),#__;qISDONE,#__,-<-
+qLEFT(1),#_0;qISDONE,#_0,-<-
+qLEFT(1),#_1;qISDONE,#_1,-<-
+
+# sinon : on passe à la transition suivante
+
+## on saute l'état de départ
+qNEXT_1,0__;qNEXT_1,0__,>--
+qNEXT_1,0_0;qNEXT_1,0_0,>--
+qNEXT_1,0_1;qNEXT_1,0_1,>--
+qNEXT_1,00_;qNEXT_1,00_,>--
+qNEXT_1,000;qNEXT_1,000,>--
+qNEXT_1,001;qNEXT_1,001,>--
+qNEXT_1,01_;qNEXT_1,01_,>--
+qNEXT_1,010;qNEXT_1,010,>--
+qNEXT_1,011;qNEXT_1,011,>--
+qNEXT_1,1__;qNEXT_1,1__,>--
+qNEXT_1,1_0;qNEXT_1,1_0,>--
+qNEXT_1,1_1;qNEXT_1,1_1,>--
+qNEXT_1,10_;qNEXT_1,10_,>--
+qNEXT_1,100;qNEXT_1,100,>--
+qNEXT_1,101;qNEXT_1,101,>--
+qNEXT_1,11_;qNEXT_1,11_,>--
+qNEXT_1,110;qNEXT_1,110,>--
+qNEXT_1,111;qNEXT_1,111,>--
+
+qNEXT_1,|0_;qNEXT_2,|0_,>--
+qNEXT_1,|00;qNEXT_2,|00,>--
+qNEXT_1,|01;qNEXT_2,|01,>--
+qNEXT_1,|1_;qNEXT_2,|1_,>--
+qNEXT_1,|10;qNEXT_2,|10,>--
+qNEXT_1,|11;qNEXT_2,|11,>--
+
+## on saute le symbole lu
+qNEXT_2,___;qNEXT_2,___,>--
+qNEXT_2,__0;qNEXT_2,__0,>--
+qNEXT_2,__1;qNEXT_2,__1,>--
+qNEXT_2,0__;qNEXT_2,0__,>--
+qNEXT_2,0_0;qNEXT_2,0_0,>--
+qNEXT_2,0_1;qNEXT_2,0_1,>--
+qNEXT_2,1__;qNEXT_2,1__,>--
+qNEXT_2,1_0;qNEXT_2,1_0,>--
+qNEXT_2,1_1;qNEXT_2,1_1,>--
+
+qNEXT_2,|__;qNEXT_3,|__,>--
+qNEXT_2,|_0;qNEXT_3,|_0,>--
+qNEXT_2,|_1;qNEXT_3,|_1,>--
+
+## on saute le symbole écrit
+qNEXT_3,___;qNEXT_3,___,>--
+qNEXT_3,__0;qNEXT_3,__0,>--
+qNEXT_3,__1;qNEXT_3,__1,>--
+qNEXT_3,0__;qNEXT_3,0__,>--
+qNEXT_3,0_0;qNEXT_3,0_0,>--
+qNEXT_3,0_1;qNEXT_3,0_1,>--
+qNEXT_3,1__;qNEXT_3,1__,>--
+qNEXT_3,1_0;qNEXT_3,1_0,>--
+qNEXT_3,1_1;qNEXT_3,1_1,>--
+
+qNEXT_3,|__;qNEXT_4,|__,>--
+qNEXT_3,|_0;qNEXT_4,|_0,>--
+qNEXT_3,|_1;qNEXT_4,|_1,>--
+
+## on saute le symbole de direction
+qNEXT_4,<__;qNEXT_4,<__,>--
+qNEXT_4,<_0;qNEXT_4,<_0,>--
+qNEXT_4,<_1;qNEXT_4,<_1,>--
+qNEXT_4,-__;qNEXT_4,-__,>--
+qNEXT_4,-_0;qNEXT_4,-_0,>--
+qNEXT_4,-_1;qNEXT_4,-_1,>--
+qNEXT_4,>__;qNEXT_4,>__,>--
+qNEXT_4,>_0;qNEXT_4,>_0,>--
+qNEXT_4,>_1;qNEXT_4,>_1,>--
+
+qNEXT_4,|__;qNEXT_5,|__,>--
+qNEXT_4,|_0;qNEXT_5,|_0,>--
+qNEXT_4,|_1;qNEXT_5,|_1,>--
+
+## on saute l'état d'arrivé
+qNEXT_5,0__;qNEXT_5,0__,>--
+qNEXT_5,0_0;qNEXT_5,0_0,>--
+qNEXT_5,0_1;qNEXT_5,0_1,>--
+qNEXT_5,00_;qNEXT_5,00_,>--
+qNEXT_5,000;qNEXT_5,000,>--
+qNEXT_5,001;qNEXT_5,001,>--
+qNEXT_5,01_;qNEXT_5,01_,>--
+qNEXT_5,010;qNEXT_5,010,>--
+qNEXT_5,011;qNEXT_5,011,>--
+qNEXT_5,1__;qNEXT_5,1__,>--
+qNEXT_5,1_0;qNEXT_5,1_0,>--
+qNEXT_5,1_1;qNEXT_5,1_1,>--
+qNEXT_5,10_;qNEXT_5,10_,>--
+qNEXT_5,100;qNEXT_5,100,>--
+qNEXT_5,101;qNEXT_5,101,>--
+qNEXT_5,11_;qNEXT_5,11_,>--
+qNEXT_5,110;qNEXT_5,110,>--
+qNEXT_5,111;qNEXT_5,111,>--
+
+# on revient à gauche de r2
+qNEXT_5,|__;qLEFT(2),|__,-<-
+qNEXT_5,|_0;qLEFT(2),|_0,-<-
+qNEXT_5,|_1;qLEFT(2),|_1,-<-
+qNEXT_5,|0_;qLEFT(2),|0_,-<-
+qNEXT_5,|00;qLEFT(2),|00,-<-
+qNEXT_5,|01;qLEFT(2),|01,-<-
+qNEXT_5,|1_;qLEFT(2),|1_,-<-
+qNEXT_5,|10;qLEFT(2),|10,-<-
+qNEXT_5,|11;qLEFT(2),|11,-<-
