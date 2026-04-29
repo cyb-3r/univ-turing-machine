@@ -1,9 +1,9 @@
-from pprint import pprint
+import sys
 from copy import deepcopy
+from pprint import pprint
+
 from turingparser import parse_machine_file, parse_transition
 from turingtypes import Move, Transition
-
-import sys
 
 BLANK: int = ord("_")
 START: str = "I"
@@ -11,7 +11,8 @@ STOP: str = "F"
 
 
 class Configuration:
-    """Représente l'état de la machine à un temps donné
+    """
+    Représente l'état de la machine à un temps donné
 
     c = (u, v, q) où :
     - u est la bande avant la tête;
@@ -88,7 +89,8 @@ class Configuration:
 
 
 class TuringMachine:
-    """Implémentation d'une machine de turing
+    """
+    Implémentation d'une machine de turing
     dont l'état est géré par la `Configuration`
     """
 
@@ -181,7 +183,6 @@ def display_chemin(configs: list[Configuration]):
 
 
 if __name__ == "__main__":
-    
     path = sys.argv[1] if len(sys.argv) > 1 else "./less.txt"
     word = sys.argv[2] if len(sys.argv) > 2 else "0001#0101"
 

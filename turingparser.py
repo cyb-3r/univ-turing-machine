@@ -1,4 +1,5 @@
-"""Contient les fonctions pour construire une machine de turing à partir de
+"""
+Contient les fonctions pour construire une machine de turing à partir de
 fichiers
 
 # Syntaxe du langage de machine de turing:
@@ -67,14 +68,14 @@ def parse_transition(code: str) -> tt.Transition:
     """
 
     temp = code.split(";")
-    
+
     current = temp[0].split(",")
     q = current[0].strip()
     a = tuple("".join(current[1:]).replace(" ", ""))
 
     next_state = temp[1].split(",")
     p = next_state[0].strip()
-    
+
     rest = "".join(next_state[1:]).replace(" ", "")
     k = len(a)
     b = tuple(rest[:k])
@@ -86,7 +87,9 @@ def parse_transition(code: str) -> tt.Transition:
 def parse_machine_file(path: str) -> tuple[str, int, list[tt.Transition]]:
     """Renvoie les éléments nécessaires à la construction d'une machine"""
     with open(path) as data:
-        lines = [line for line in map(str.strip, data) if line and not line.startswith("#")]
+        lines = [
+            line for line in map(str.strip, data) if line and not line.startswith("#")
+        ]
 
     name = read_header_line(lines[0])
     rubans = int(read_header_line(lines[1]))
