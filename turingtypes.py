@@ -1,4 +1,5 @@
-"""Contient la définition de types utiles
+"""
+Contient la définition de types utiles
 pour travailler avec les machines de turing
 """
 

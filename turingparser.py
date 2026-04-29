@@ -96,3 +96,59 @@ def parse_machine_file(path: str) -> tuple[str, int, list[tt.Transition]]:
     transitions = [parse_transition(code) for code in lines[2:]]
 
     return (name, rubans, transitions)
+
+
+def machine_to_code(path: str) -> str:
+    name, rubans, transitions = parse_machine_file(path)
+
+    moves = {tt.Move.LEFT: "<", tt.Move.STAY: "-", tt.Move.RIGHT: ">"}
+    etats = {"I": "0", "F": "1"}
+    cpt = 1
+
+    # on associe les états à un entier unique
+    for t in transitions:
+        if t.q_state not in etats.keys():
+            etats[t.q_state] = f"{(cpt := cpt + 1):b}"
+
+        if t.p_state not in etats.keys():
+            etats[t.p_state] = f"{(cpt := cpt + 1):b}"
+
+    coded_transitions = []
+    for t in transitions:
+        r = "".join(map(chr, t.r_symbol))
+        w = "".join(map(chr, t.w_symbol))
+        m = "".join(moves[mv] for mv in t.move)
+        coded_transitions.append(f"{etats[t.q_state]}|{r}|{w}|{m}|{etats[t.p_state]}")
+
+    return "|".join(coded_transitions)
+
+
+def to_ascii(c: str) -> str:
+    match c:
+        case "_":
+            return "0" * 8
+        case "|" | "#" | "<" | "-" | ">":
+            return c
+        case _:
+            return f"{ord(c):08b}"
+
+
+def code_to_binary(path: str) -> str:
+    mappings = {
+        "1": "111",
+        "0": "000",
+        "|": "010",
+        "#": "001",
+        "<": "110",
+        "-": "100",
+        ">": "101",
+    }
+    code = machine_to_code(path)
+    return "".join(mappings[bit] for char in code for bit in to_ascii(char))
+
+
+if __name__ == "__main__":
+    print(machine_to_code("./machines/op-not.txt"))
+    bin_code = code_to_binary("./machines/op-not.txt")
+    print(f"Binary representation:\n{bin_code}")
+    print(f"Integer representation:\n1{bin_code}")

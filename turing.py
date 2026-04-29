@@ -1,6 +1,4 @@
 import sys
-from copy import deepcopy
-from pprint import pprint
 
 from turingparser import parse_machine_file, parse_transition
 from turingtypes import Move, Transition
@@ -138,20 +136,6 @@ class TuringMachine:
         config.q = p_state
         return config
 
-    def _run_configs(self, mot: str) -> list[Configuration]:
-        print(f"Exécution de la machine: {self.nom}")
-        chemin: list[Configuration] = []
-        config = Configuration(mot, self.ruban)
-        while config.q != STOP:
-            try:
-                chemin.append(deepcopy(config))
-                config = self.step(config)
-            except ValueError as e:
-                print(e)
-                break
-        chemin.append(deepcopy(config))
-        return chemin
-
     def run(self, mot: str) -> str:
         print(f"Exécution de la machine: {self.nom}")
         config = Configuration(mot, self.ruban)
@@ -187,5 +171,4 @@ if __name__ == "__main__":
     word = sys.argv[2] if len(sys.argv) > 2 else "0001#0101"
 
     tm = TuringMachine.from_file(path)
-    pprint(tm._run_configs(word))
     tm.run_and_log(word)

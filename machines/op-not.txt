@@ -1,0 +1,10 @@
+name: NOT operation
+rubans: 1
+
+# entrée : x
+
+# transforme les 1 en 0 et les 0 en 1
+
+I,_;F,_,-
+I,0;I,1,>
+I,1;I,0,>

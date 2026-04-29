@@ -1,0 +1,47 @@
+name: Recherche
+rubans: 2
+
+# entrée: x#w_1#w_2#...#w_l
+
+# la machine va tester pour chaque w_i si x == w_i
+# on s'arrête lorsqu'on trouve w_i : x == w_i
+
+I,__;qLOOP,__,--
+
+# on copie x dans r2
+I,0_;I,_0,>>
+I,1_;I,_1,>>
+
+I,#_;qLEFT(2),#_,-<
+qLEFT(2),#0;qLEFT(2),#0,-<
+qLEFT(2),#1;qLEFT(2),#1,-<
+
+qLEFT(2),#_;qTEST,#_,>>
+qTEST,00;qTEST,00,>>
+qTEST,11;qTEST,11,>>
+qTEST,#_;F,#_,--
+qTEST,__;F,__,--
+
+qTEST,01;qSKIP,01,--
+qTEST,10;qSKIP,10,--
+qTEST,0_;qSKIP,0_,--
+qTEST,1_;qSKIP,1_,--
+qTEST,#1;qSKIP,#1,--
+qTEST,#0;qSKIP,#0,--
+
+qSKIP,0_;qSKIP,0_,>-
+qSKIP,00;qSKIP,00,>-
+qSKIP,01;qSKIP,01,>-
+qSKIP,1_;qSKIP,1_,>-
+qSKIP,10;qSKIP,10,>-
+qSKIP,11;qSKIP,11,>-
+
+qSKIP,__;qLOOP,__,--
+qSKIP,_0;qLOOP,__,--
+qSKIP,_1;qLOOP,__,--
+
+qSKIP,#_;qLEFT(2),#_,--
+qSKIP,#0;qLEFT(2),#0,--
+qSKIP,#1;qLEFT(2),#1,--
+
+qLOOP,__;qLOOP,__,--

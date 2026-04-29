@@ -1,0 +1,43 @@
+name: less
+rubans: 2
+
+# entrée : x#y
+
+# si x et y n'ont pas la même taille
+# alors on ajoute des 0 à gauche du nombre le plus petit
+# e.g : 1#0010 => 0001#0010
+
+# si rien n'est donné en entrée, on ne fait rien
+I,__;LOOP,__,--
+
+# on déplace x dans r2
+I,1_;I,_1,>>
+I,0_;I,_0,>>
+
+# on se place à droite de x et de y
+I,#_;qRIGHT(1),__,>-
+qRIGHT(1),0_;qRIGHT(1),0_,>-
+qRIGHT(1),1_;qRIGHT(1),1_,>-
+
+# on ajoute des 0 à gauche du plus petit mot pour avoir une comparaison précise
+qRIGHT(1),__;qSETUP,__,<<
+qSETUP,00;qSETUP,00,<<
+qSETUP,01;qSETUP,01,<<
+qSETUP,10;qSETUP,10,<<
+qSETUP,11;qSETUP,11,<<
+qSETUP,0_;qSETUP,00,<<
+qSETUP,_0;qSETUP,00,<<
+qSETUP,1_;qSETUP,10,<<
+qSETUP,_1;qSETUP,01,<<
+
+# on commence à comparer x et y
+qSETUP,__;qTEST,__,>>
+qTEST,11;qTEST,11,>>
+qTEST,00;qTEST,00,>>
+
+# si x < y : on s'arrête
+qTEST,10;F,10,--
+
+# sinon : on ne s'arrête pas
+qTEST,__;qLOOP,__,--
+qLOOP,__,;qLOOP,__,--

@@ -1,0 +1,33 @@
+name: Multiplication Unaire
+rubans: 3
+
+# entrée : x#y
+# sortie : x * y (sur r1)
+
+# la machine va déplacer x dans r2, et copier y dans r3
+# puis elle va copier le mot y x fois dans r1
+
+I,___;F,___,---
+
+I,1__;I,__1,>->
+I,#__;qCOPY_y,___,>--
+
+qCOPY_y,1__;qCOPY_y,11_,>>-
+qCOPY_y,___;qLEFT(2),___,-<-
+
+# replace la tête de r2 à gauche
+qLEFT(2),_1_;qLEFT(2),_1_,-<-
+qLEFT(2),_11;qLEFT(2),_11,-<-
+qLEFT(2),__1;qSTEP,__1,--<
+
+# lorsqu'on commence, on décale la tête à gauche 2 fois
+# pour ne pas multiplier par x + 1
+qLEFT(2),___;qBEGIN,___,--<
+qBEGIN,__1;qADD,__1,-><
+
+# on ajoute une copie de y dans r1
+qADD,_11;qADD,111,>>-
+qADD,__1;qLEFT(2),__1,-<-
+
+qSTEP,__1;qADD,__1,->-
+qSTEP,___;F,___,---
