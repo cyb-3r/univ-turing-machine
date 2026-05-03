@@ -127,7 +127,7 @@ def to_ascii(c: str) -> str:
     match c:
         case "_":
             return "0" * 8
-        case "|" | "#" | "<" | "-" | ">":
+        case "|" | "#" | "<" | "-" | ">" | "0" | "1":
             return c
         case _:
             return f"{ord(c):08b}"

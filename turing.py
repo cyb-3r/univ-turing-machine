@@ -9,8 +9,7 @@ STOP: str = "F"
 
 
 class Configuration:
-    """
-    Représente l'état de la machine à un temps donné
+    """Représente l'état de la machine à un temps donné
 
     c = (u, v, q) où :
     - u est la bande avant la tête;
@@ -87,8 +86,7 @@ class Configuration:
 
 
 class TuringMachine:
-    """
-    Implémentation d'une machine de turing
+    """Implémentation d'une machine de turing
     dont l'état est géré par la `Configuration`
     """
 
@@ -137,15 +135,18 @@ class TuringMachine:
         return config
 
     def run(self, mot: str) -> str:
-        print(f"Exécution de la machine: {self.nom}")
+        print(f"--- Exécution de la machine '{self.nom}' sur {mot} ---")
         config = Configuration(mot, self.ruban)
         while config.q != STOP:
             try:
                 config = self.step(config)
             except ValueError:
                 return "_"
-        return " | ".join(
-            [f"{u}{v}".strip("_") for u, v in zip(config.u_str(), config.v_str())]
+        return " ; ".join(
+            [
+                f"{u}[{v[0:1]}]{v[1:]}".strip("_")
+                for u, v in zip(config.u_str(), config.v_str())
+            ]
         )
 
     def run_and_log(self, mot: str) -> bool:
